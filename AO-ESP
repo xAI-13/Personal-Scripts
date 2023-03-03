@@ -1,0 +1,199 @@
+repeat task.wait() until game:IsLoaded()
+--lib
+local lib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local ui = lib:MakeWindow({
+    Name = "AO ESP",
+    HidePremium = false,
+    IntroEnabled = false,
+    SaveConfig = true,
+    ConfigFolder = "Orion Lib"})
+ 
+--locals & constants
+local plr = game.Players.LocalPlayer
+local espBool, chestBool, bagBool, crateBool = true, true, true, true
+local espDistance = 5000
+local espSize = 25
+local espFont = Drawing.Fonts.UI
+local espColor = Color3.new(1,1,1)
+local espOutlineColor = Color3.new(0,0,0)
+local camera = workspace.CurrentCamera
+local runSer = game:GetService('RunService')
+ 
+--functions
+local function espDraw(model)
+    local text = Drawing.new('Text')
+    text.Visible = false
+    text.Transparency = 1
+    text.Center = true
+    text.Color = Color3.new(1,1,1)
+    text.Outline = true
+    text.OutlineColor = Color3.new(0,0,0)
+    text.Size = espSize
+    text.Font = espFont
+    
+    local objType
+    if string.match(model.Name, " Chest") then
+        objType = "Chest"
+    end
+    if string.match(model.Name, " Bag") then
+        objType = "Bag"
+    end
+    if string.match(model.Name, " Crate") then
+        objType = "Crate"
+    end
+    
+    local render = runSer.RenderStepped:connect(function()
+        local plrChar = plr.Character
+        local plrHRP = plrChar:FindFirstChild('HumanoidRootPart')
+        local objPart
+        
+        if objType == 'Chest' then 
+            objPart = model:FindFirstChild('Base')
+        end
+        if objType == 'Bag' or objType == 'Crate' then 
+            objPart = model:FindFirstChild('Part')
+        end
+        
+        if not objPart then text:Remove() return end
+        local vector, onScreen = camera:WorldToViewportPoint(objPart.Position)
+        if not onScreen then text.Visible = false return end
+        if not espBool then text.Visible = false return end
+        if not chestBool and objType == 'Chest' then text.Visible = false return end
+        if not bagBool and objType == 'Bag' then text.Visible = false return end
+        if not crateBool and objType == 'Crate' then text.Visible = false return end
+        if model:FindFirstChild('Open') then text:Remove() render:Disconnect() return end
+        if math.floor((objPart.Position-plrHRP.Position).Magnitude) > espDistance then text.Visible = false return end
+        text.Visible = true
+        text.Text = model.Name..' - '..tostring(math.floor((plrHRP.Position-objPart.Position).Magnitude))..'m'
+        text.Position = Vector2.new(vector.X,vector.Y)
+        text.Color = espColor
+        text.OutlineColor = espOutlineColor
+        text.Size = espSize
+        text.Font = espFont
+
+    end)    
+end
+
+ 
+--===============================
+local page1 = ui:MakeTab({
+    Name = "Main",
+    PremiumOnly = false
+})
+
+local espToggle = page1:AddToggle({
+    Name = "Toggle ESP",
+    Default = true,
+    Callback = function(value)
+        espBool = value
+    end
+})
+
+local objSect = page1:AddSection({Name = 'Object'})
+
+local chestToggle = page1:AddToggle({
+    Name = "Enable Chests",
+    Default = true,
+    Callback = function(value)
+        chestBool = value
+    end
+})
+
+local bagToggle = page1:AddToggle({
+    Name = "Enable Bags",
+    Default = true,
+    Callback = function(value)
+        bagBool = value
+    end
+})
+
+local crateToggle = page1:AddToggle({
+    Name = "Enable Crates",
+    Default = true,
+    Callback = function(value)
+        crateBool = value
+    end
+})
+
+local ESPDistanceSlider = page1:AddSlider({
+    Name = 'Max ESP Distance',
+    Callback = function(value)
+    espDistance = value
+    end,
+    Min = 0, 
+    Max = 10000,
+    Default = 5000,
+})
+
+local ESPSizeSlider = page1:AddSlider({
+    Name = 'Text Size',
+    Callback = function(value)
+    espSize = value
+    end,
+    Min = 1, 
+    Max = 50,
+    Default = 25,
+})
+
+local ESPFontSlider = page1:AddDropdown({
+    Name = 'Font',
+    Callback = function(value)
+        if value == 'UI' then
+            espFont = Drawing.Fonts.UI
+        elseif value == 'System' then
+            espFont = Drawing.Fonts.System
+        elseif value == 'Plex' then
+            espFont = Drawing.Fonts.Plex
+        elseif value == 'Monospace' then
+            espFont = Drawing.Fonts.Monospace
+        end
+    end,
+    Options = {
+    'UI',
+    'System',
+    'Plex',
+    'Monospace'
+	}
+})
+
+local ESPColorPicker = page1:AddColorpicker({
+	Name = "ESP Color",
+	Default = Color3.fromRGB(255, 0, 0),
+	Callback = function(Value)
+		espColor = Color3.new(value)
+	end	  
+})
+
+local ESPOutlineColorPicker = page1:AddColorpicker({
+	Name = "ESP Outline Color",
+	Default = Color3.fromRGB(255, 0, 0),
+	Callback = function(Value)
+		espOutlineColorColor = Color3.new(value)
+	end	  
+})
+
+
+
+--===============================
+--initial esp 
+for i,v in next, game:GetDescendants() do
+    if string.match(v.Name, " Chest") and v:FindFirstChild("Base") then
+    espDraw(v)
+    elseif string.match(v.Name, " Bag") and v:FindFirstChild("Part") then
+    espDraw(v)
+    elseif string.match(v.Name, " Crate") and v:FindFirstChild("Part") then
+    espDraw(v)
+    end
+end
+--spawn event
+game.DescendantAdded:Connect(function(v)
+    if string.match(v.Name, " Chest") and v:FindFirstChild("Base") then
+    espDraw(v)
+    elseif string.match(v.Name, " Bag") and v:FindFirstChild("Part") then
+    espDraw(v)
+    elseif string.match(v.Name, " Crate") and v:FindFirstChild("Part") then
+    espDraw(v)
+    end
+end)
+
+lib:Init()
