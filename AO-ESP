@@ -12,8 +12,8 @@ local ui = lib:MakeWindow({
 local plr = game.Players.LocalPlayer
 local espBool, chestBool, bagBool, crateBool = true, true, true, true
 local espDistance = 5000
-local espSize = 25
-local espFont = Drawing.Fonts.UI
+local espSize = 15
+local espFont = Drawing.Fonts.Monospace
 local espColor = Color3.new(1,1,1)
 local espOutlineColor = Color3.new(0,0,0)
 local camera = workspace.CurrentCamera
@@ -117,6 +117,8 @@ local crateToggle = page1:AddToggle({
     end
 })
 
+local customSect = page1:AddSection({Name = 'Customise'})
+
 local ESPDistanceSlider = page1:AddSlider({
     Name = 'Max ESP Distance',
     Callback = function(value)
@@ -134,7 +136,7 @@ local ESPSizeSlider = page1:AddSlider({
     end,
     Min = 1, 
     Max = 50,
-    Default = 25,
+    Default = 15,
 })
 
 local ESPFontSlider = page1:AddDropdown({
