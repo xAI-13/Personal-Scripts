@@ -43,6 +43,7 @@ local function espDraw(model)
     end
     
     local render = runSer.RenderStepped:connect(function()
+        local s, e = pcall(function()
         local plrChar = plr.Character
         local plrHRP = plrChar:FindFirstChild('HumanoidRootPart')
         local objPart
@@ -67,10 +68,11 @@ local function espDraw(model)
         text.Text = model.Name..' - '..tostring(math.floor((plrHRP.Position-objPart.Position).Magnitude))..'m'
         text.Position = Vector2.new(vector.X,vector.Y)
         text.Color = espColor
+        text.Outline = true
         text.OutlineColor = espOutlineColor
         text.Size = espSize
         text.Font = espFont
-
+        end)
     end)    
 end
 
@@ -158,17 +160,25 @@ local ESPFontSlider = page1:AddDropdown({
 
 local ESPColorPicker = page1:AddColorpicker({
 	Name = "ESP Color",
-	Default = Color3.fromRGB(255, 0, 0),
-	Callback = function(Value)
-		espColor = Color3.new(value)
+	Default = Color3.fromRGB(255, 255, 255),
+	Callback = function(value)
+	    local colorStr = string.split(tostring(value),',')
+        local r = tonumber(colorStr[1])
+        local g = tonumber(colorStr[2])
+        local b = tonumber(colorStr[3])
+		espColor = Color3.new(r,g,b)
 	end	  
 })
 
 local ESPOutlineColorPicker = page1:AddColorpicker({
 	Name = "ESP Outline Color",
-	Default = Color3.fromRGB(255, 0, 0),
-	Callback = function(Value)
-		espOutlineColorColor = Color3.new(value)
+	Default = Color3.fromRGB(0, 0, 0),
+	Callback = function(value)
+		local colorStr = string.split(tostring(value),',')
+        local r = tonumber(colorStr[1])
+        local g = tonumber(colorStr[2])
+        local b = tonumber(colorStr[3])
+		espOutlineColor = Color3.new(r,g,b)
 	end	  
 })
 
