@@ -45,7 +45,7 @@ local function espDraw(model)
     local render = runSer.RenderStepped:connect(function()
         local s, e = pcall(function()
         local plrChar = plr.Character
-        local plrHRP = plrChar:FindFirstChild('HumanoidRootPart')
+        local plrHRP = plrChar:WaitForChild('HumanoidRootPart')
         local objPart
         
         if objType == 'Chest' then 
@@ -62,7 +62,7 @@ local function espDraw(model)
         if not chestBool and objType == 'Chest' then text.Visible = false return end
         if not bagBool and objType == 'Bag' then text.Visible = false return end
         if not crateBool and objType == 'Crate' then text.Visible = false return end
-        if model:FindFirstChild('Open') then text:Remove() render:Disconnect() return end
+        if model:FindFirstChild('Open') or not objPart or not model or model == nil then text:Remove() render:Disconnect() return end
         if math.floor((objPart.Position-plrHRP.Position).Magnitude) > espDistance then text.Visible = false return end
         text.Visible = true
         text.Text = model.Name..' - '..tostring(math.floor((plrHRP.Position-objPart.Position).Magnitude))..'m'
@@ -188,7 +188,7 @@ local ESPOutlineColorPicker = page1:AddColorpicker({
 
 --===============================
 --initial esp 
-for i,v in next, game:GetDescendants() do
+for i,v in next, workspace.Map:GetDescendants() do
     if string.match(v.Name, " Chest") and v:FindFirstChild("Base") then
     espDraw(v)
     elseif string.match(v.Name, " Bag") and v:FindFirstChild("Part") then
@@ -198,7 +198,7 @@ for i,v in next, game:GetDescendants() do
     end
 end
 --spawn event
-game.DescendantAdded:Connect(function(v)
+workspace.Map.DescendantAdded:Connect(function(v)
     if string.match(v.Name, " Chest") and v:FindFirstChild("Base") then
     espDraw(v)
     elseif string.match(v.Name, " Bag") and v:FindFirstChild("Part") then
