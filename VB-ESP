@@ -36,15 +36,35 @@ local function espDraw(model)
         local s, e = pcall(function()
         local plrChar = plr.Character
         local plrHRP = plrChar:WaitForChild('HumanoidRootPart')
+        local magical = model:FindFirstChild('MagicalL')
+        local bloody = model:FindFirstChild('BloodyL')
+        local corrupt = model:FindFirstChild('CorruptL')
+        local legendary = model:FindFirstChild('LegendaryL')
         
-        if not model then text:Remove() return end
+        if not model or model == nil then text:Remove() render:Disconnect() return end
         local vector, onScreen = camera:WorldToViewportPoint(model.Position)
         if not onScreen then text.Visible = false return end
         if not espBool then text.Visible = false return end
-        if not model or model == nil then text:Remove() render:Disconnect() return end
         if math.floor((model.Position-plrHRP.Position).Magnitude) > espDistance then text.Visible = false return end
         text.Visible = true
         text.Text = string.gsub(model.Name, "%d+", "")..' - '..tostring(math.floor((plrHRP.Position-model.Position).Magnitude))..'m'
+        
+        if magical.Enabled then
+            text.Text = text.Text.."\n".."[Magical]"
+        end
+        
+        if bloody.Enabled then
+            text.Text = text.Text.."\n".."[Bloody]"
+        end
+        
+        if corrupt.Enabled then
+            text.Text = text.Text.."\n".."[Corrupt]"
+        end
+            
+        if legendary.Enabled then
+            text.Text = text.Text.."\n".."[Legendary]"
+        end
+        
         text.Position = Vector2.new(vector.X,vector.Y)
         text.Color = espColor
         text.Outline = true
@@ -53,6 +73,16 @@ local function espDraw(model)
         text.Font = espFont
         end)
     end)    
+    
+    local removeConnection = workspace.NPCS.ChildRemoved:connect(function(v)
+        if v == model then
+            local s, e = pcall(function()
+            text:Remove()    
+            render:Disconnect()
+            removeConnection:Disconnect()
+            end)
+        end
+    end)
 end
 
  
