@@ -10,7 +10,7 @@ local ui = lib:MakeWindow({
  
 --locals & constants
 local plr = game.Players.LocalPlayer
-local espBool = true
+local espBool, hpBool = true, false
 local espDistance = 5000
 local espSize = 15
 local espFont = Drawing.Fonts.Monospace
@@ -46,8 +46,17 @@ local function espDraw(model)
         if not onScreen then text.Visible = false return end
         if not espBool then text.Visible = false return end
         if math.floor((model.Position-plrHRP.Position).Magnitude) > espDistance then text.Visible = false return end
+        text.Text = ""
         text.Visible = true
-        text.Text = string.gsub(model.Name, "%d+", "")..' - '..tostring(math.floor((plrHRP.Position-model.Position).Magnitude))..'m'
+        text.Text = string.gsub(model.Name, "%d+", "")
+        
+        if hpBool then
+            local maxHP = model:GetAttribute("MAXHP")
+            local hp = model:GetAttribute("HP")
+            text.Text = text.Text.." ["..tostring(math.floor(hp)).."/"..tostring(math.floor(maxHP)).."]"    
+        end    
+        
+        text.Text = text.Text..' - '..tostring(math.floor((plrHRP.Position-model.Position).Magnitude))..'m'
         
         if magical.Enabled then
             text.Text = text.Text.."\n".."[Magical]"
@@ -64,6 +73,7 @@ local function espDraw(model)
         if legendary.Enabled then
             text.Text = text.Text.."\n".."[Legendary]"
         end
+        
         
         text.Position = Vector2.new(vector.X,vector.Y)
         text.Color = espColor
@@ -97,6 +107,14 @@ local espToggle = page1:AddToggle({
     Default = true,
     Callback = function(value)
         espBool = value
+    end
+})
+
+local hpToggle = page1:AddToggle({
+    Name = "Mob HP",
+    Default = false,
+    Callback = function(value)
+        hpBool = value
     end
 })
 
